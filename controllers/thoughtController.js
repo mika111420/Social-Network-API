@@ -65,6 +65,31 @@ module.exports = {
       res.status(500).json(err)
     }
   },
+  async deleteThought(req, res){
+    try{
+        const dbThoughtData = await Thought.findOneAndRemove({ _id: req.params.thoughtId })
+        
+        
+        if (!dbThoughtData) {
+          return res.status(404).json({ message: 'Not found with this ID!' });
+        }
+  
+        const user = await User.findOneAndUpdate(
+          { thoughts: req.params.thoughtId },
+          { $pull: { thoughts: req.params.thoughtId } },
+          { new: true }
+        );
+  
+        if (!user) {
+          return res
+            .status(404)
+            .json({ message: 'Thought deleted, no user found with ID' });
+        }
+        res.json(dbThoughtData)
+    }catch (err){
+        res.status(500).json(err);
+    }
+  },
   async deleteReaction(req, res){
     try {
         
@@ -83,4 +108,5 @@ module.exports = {
         res.status(500).json(err);
     }
   },
+
 };
